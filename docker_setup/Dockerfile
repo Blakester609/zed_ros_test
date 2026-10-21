@@ -1,4 +1,4 @@
-FROM osrf/ros:humble-desktop
+FROM stereolabs/zed:5.5.0-devel-cuda13.0-ubuntu22.04	
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Define a username for the new user
@@ -18,6 +18,15 @@ RUN echo "source /opt/ros/humble/setup.bash" >> /home/$NAME/.bashrc && \
     echo "export _colcon_cd_root=/opt/ros/humble/" >> /home/$NAME/.bashrc && \
     echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> /home/$NAME/.bashrc && \
     touch /home/$NAME/.hushlogin
+
+WORKDIR /ros2_ws/src
+RUN git clone https://github.com/stereolabs/zed-ros2-wrapper.git
+
+WORKDIR /ros2_ws
+RUN apt-get update && rosdep update && \
+    rosdep install --from-paths src --ignore-src -r -y && \
+    . /opt/ros/humble/setup.bash && \
+    colcon build --symlink-install --cmake-args=-DCMAKE_BUILD_TYPE=Release
 
  # Fix the mmc_rule sudoers file syntax if it exists. This file is inconsequential if it doesn't exist, but it throws an error about improper syntax if it does.
 USER root
