@@ -1,0 +1,27 @@
+services:
+  ros_test_container:
+    image: ros_test_image
+    container_name: ros_test_container
+    build:
+      context: ..
+      dockerfile: docker_setup/Dockerfile
+    user: marsrover
+    network_mode: host
+    privileged: true
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - ../ros_ws:/home/marsrover/ros_ws
+      - ./entrypoint.sh:/startup/entrypoint.sh
+      - /etc/localtime:/etc/localtime:ro # Required for correct time synchronization
+      - /tmp/.X11-unix:/tmp/.X11-unix # Required for GUI applications
+      - /dev:/dev:rw  # Required for accessing USB devices
+      - /run/media:/run/media:rw,shared # Required for accessing USB devices
+      - /mnt:/mnt:rw,shared # Required for accessing mounted drives
+      - /media:/media:rw,shared # Required for accessing mounted drives
+
+    restart: always
+    entrypoint: /startup/entrypoint.sh
+    stdin_open: true
+    tty: true
